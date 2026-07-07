@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import xbmcaddon, os, xbmcgui, re, xbmcplugin, json, xbmc, inputstreamhelper
+import base64
 from resources.lib import client
 from resources.lib.utils import py2_encode
 
@@ -8,10 +9,12 @@ if sys.version_info[0] == 3:
     import urllib.parse as urlparse
     from urllib.parse import quote_plus
     from urllib.parse import parse_qsl
+    import urllib.request as urllib_req
 else:
     import urlparse
     from urllib import quote_plus
     from urlparse import parse_qsl
+    import urllib2 as urllib_req
 
 m4_url = 'https://www.m4sport.hu'
 syshandle = int(sys.argv[1])
@@ -172,6 +175,21 @@ def getLive():
                 if license_key:
                     list_item.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
                     list_item.setProperty('inputstream.adaptive.license_key', f"{license_key}||R{{SSM}}|")
+
+                # use serverCertificate to encrypt sensitive device info, might also improve latency and compatibility
+                cert_url = drm.get("serverCertificateUrl")
+                if cert_url:
+                    if cert_url.startswith("//"):
+                        cert_url = "https:" + cert_url
+
+                    try:
+                        req = urllib_req.Request(cert_url, headers={'User-Agent': 'Mozilla/5.0'})
+                        response = urllib_req.urlopen(req)
+                        cert_bytes = response.read()
+                        cert_b64 = base64.b64encode(cert_bytes).decode('utf-8')
+                        list_item.setProperty('inputstream.adaptive.server_certificate', cert_b64)
+                    except Exception as e:
+                        print(f"Widevine Cert Hiba - Failed to fetch server certificate: {e}")
 
         elif stream_type == "hls" or stream_url.endswith(".m3u8"):
             list_item.setProperty('inputstream', 'inputstream.adaptive')
