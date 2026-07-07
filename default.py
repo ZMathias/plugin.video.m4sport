@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-import xbmcaddon, os, xbmcgui, re, xbmcplugin, json, xbmc
+import xbmcaddon, os, xbmcgui, re, xbmcplugin, json, xbmc, inputstreamhelper
 from resources.lib import client
 from resources.lib.utils import py2_encode
 
@@ -80,12 +80,12 @@ def getEpisodes():
     xbmcplugin.endOfDirectory(syshandle)
 
 
-def isDirty(candidate):
+def isDirty(candidate: str):
     if candidate is None:
         return True
 
     blocklist = ['bumper', 'promo', 'advertisement', 'reklam']
-    return any(word in candidate for word in blocklist)
+    return any(word in candidate.lower() for word in blocklist)
 
 
 def getValidStreams(playlist_data):
@@ -98,7 +98,10 @@ def getValidStreams(playlist_data):
 
     for obj in ls:
         if not isDirty(obj.get('file', None)):  # an URL is dirty if it contains promo keywords or if it is of type None
+            print(f'Found valid URL: {obj.get('file')}')
             valid_list.append(obj)
+        else:
+            print(f'Filtered the following URL: {obj.get('file')}')
 
     return valid_list
 
@@ -112,12 +115,14 @@ def getLive():
     regex_match = re.search(r'var\s+playData\s*=\s*(\[[\s\S]*?\])\s*;', r)
 
     if regex_match is None:
-        regex_match = re.search(r'(\[[^\]]*?"connectmedia"[^\]]*?\])',
-                                r)  # fallback regex to search for the connectmedia string if the edge server generated JS code changes
+        regex_match = re.search(r'(\[[^\]]*?"connectmedia"[^\]]*?\])',r)  # fallback regex to search for the connectmedia string if the edge server generated JS code changes
 
     if regex_match is None:  # only throw fatal error if both failed
-        ok = xbmcgui.Dialog().ok('Stream hiba',
-                                 'A stream URL nem található. A válasz struktúra változhatott...')
+        if content_id.startswith('extra'):
+            error_msg = 'Ezen az időszakos streamen jelenleg nincsen adás.'
+        else:
+            error_msg = 'Nem található egy helyes stream URL sem.'
+        ok = xbmcgui.Dialog().ok('Stream hiba', error_msg)
         return  # fatal error
 
     valid_streams = []
@@ -152,7 +157,7 @@ def getLive():
         if not stream_url.startswith("http"):
             stream_url = "https:" + stream_url if stream_url.startswith("//") else stream_url
 
-        item_title = f"Stream {index + 1}"
+        item_title = f"{title} Stream {index + 1}"
 
         list_item = xbmcgui.ListItem(label=item_title)
         list_item.setProperty('IsPlayable', 'true')
@@ -175,15 +180,21 @@ def getLive():
         kodi_playlist.add(url=stream_url, listitem=list_item)
 
     if kodi_playlist.size() > 0:
+        is_helper = inputstreamhelper.Helper('mpd', drm='widevine')
+
+        if not is_helper.check_inputstream():
+            xbmcgui.Dialog().ok('Hiba', 'Widevine CDM telepítése sikertelen vagy megszakítva.')
+            return
+
         xbmcplugin.setResolvedUrl(syshandle, False, xbmcgui.ListItem())
         xbmc.Player().play(kodi_playlist)
 
 
 def getVideo():
     r = client.request(url)
-    token = re.search('[\'"]token[\'"]\s*:\s*[\'"]([^\'"]+)', r).group(1)
+    token = re.search(r'[\'"]token[\'"]\s*:\s*[\'"]([^\'"]+)', r).group(1)
     m = client.request('http://player.mediaklikk.hu/playernew/player.php?video=' + token)
-    link = re.search('"file"\s*:\s*"([^"]+)', m).group(1)
+    link = re.search(r'"file"\s*:\s*"([^"]+)', m).group(1)
     link = link.replace('\\', '')
     if (not link.startswith("http:") or not link.startswith("https:")):
         link = "%s%s" % ("https:", link)
@@ -231,7 +242,8 @@ def getStream(url):
 def resolve(url, icon, title):
     item = xbmcgui.ListItem(path=url)
     item.setArt({'icon': icon, 'thumb': icon})
-    item.setInfo(type='Video', infoLabels={'Title': title})
+    info_tag = item.getVideoInfoTag()
+    info_tag.setTitle(title)
     xbmcplugin.setResolvedUrl(syshandle, True, item)
 
 
@@ -274,7 +286,8 @@ def addDir(item):
 
     liz = xbmcgui.ListItem(label=label)
     liz.setArt({'icon': image, 'thumb': image, 'poster': image, 'fanart': fanart})
-    liz.setInfo(type="Video", infoLabels={"Title": label})
+    info_tag = liz.getVideoInfoTag()
+    info_tag.setTitle(label)
 
     if isFolder is False:
         if item.get('action') != 'getLive':
@@ -293,7 +306,7 @@ page = params.get("page")
 category = params.get("category")
 streamid = params.get("streamid", '')
 
-if action == None:
+if action is None:
     root()
 elif action == 'getEpisodes':
     getEpisodes()
