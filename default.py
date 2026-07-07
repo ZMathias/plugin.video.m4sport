@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import xbmcaddon,os,xbmcgui,re,xbmcplugin,json
+import sys
+import xbmcaddon, os, xbmcgui, re, xbmcplugin, json, xbmc
 from resources.lib import client
 from resources.lib.utils import py2_encode
 
@@ -15,43 +16,57 @@ else:
 m4_url = 'https://www.m4sport.hu'
 syshandle = int(sys.argv[1])
 
-def root():
-    addDir({'title': '[COLOR red]''[B]' + u'M4 \u00C9l\u0151' + '[/B][/COLOR]', 'action': 'getLive', 'streamid': 'mtv4live', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 1' +'[/COLOR]', 'action': 'getLive', 'streamid': 'extra', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 2' +'[/COLOR]', 'action': 'getLive', 'streamid': 'extra2', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 3' +'[/COLOR]', 'action': 'getLive', 'streamid': 'extra3', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 4' +'[/COLOR]', 'action': 'getLive', 'streamid': 'extra4', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 5' +'[/COLOR]', 'action': 'getLive', 'streamid': 'extra5', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 Sport 1' +'[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport1', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 Sport 2' +'[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport2', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 Sport 3' +'[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport3', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 Sport 4' +'[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport4', 'isFolder': 'false'})
-    addDir({'title': '[COLOR orange]' + u'M4 Sport 5' +'[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport5', 'isFolder': 'false'})
 
-    categories = [ {'category': '1020', 
+def root():
+    addDir({'title': '[COLOR red]''[B]' + u'M4 \u00C9l\u0151' + '[/B][/COLOR]', 'action': 'getLive',
+            'streamid': 'mtv4live', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 1' + '[/COLOR]', 'action': 'getLive',
+            'streamid': 'extra', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 2' + '[/COLOR]', 'action': 'getLive',
+            'streamid': 'extra2', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 3' + '[/COLOR]', 'action': 'getLive',
+            'streamid': 'extra3', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 4' + '[/COLOR]', 'action': 'getLive',
+            'streamid': 'extra4', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 id\u0151szakos stream 5' + '[/COLOR]', 'action': 'getLive',
+            'streamid': 'extra5', 'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 Sport 1' + '[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport1',
+            'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 Sport 2' + '[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport2',
+            'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 Sport 3' + '[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport3',
+            'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 Sport 4' + '[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport4',
+            'isFolder': 'false'})
+    addDir({'title': '[COLOR orange]' + u'M4 Sport 5' + '[/COLOR]', 'action': 'getLive', 'streamid': 'm4sport5',
+            'isFolder': 'false'})
+
+    categories = [{'category': '1020',
                    'title': u'Sporth\u00EDrek'},
 
-                   {'category': '768',
+                  {'category': '768',
                    'title': 'Magyar foci'},
 
-                   {'category': '548',
-                   'title': 'Boxutca',},
+                  {'category': '548',
+                   'title': 'Boxutca'},
 
-                   {'category': '1025',
+                  {'category': '1025',
                    'title': u'Sportk\u00F6zvet\u00EDt\u00E9sek'}]
-    
-    [i.update({'action': 'getEpisodes', 'page': '1', 'IsFolder': 'true'}) for i in categories]
+
+    [i.update({'action': 'getEpisodes', 'page': '1', 'isFolder': 'true'}) for i in categories]
     for i in categories:
         addDir(i)
     xbmcplugin.endOfDirectory(syshandle)
 
 
 def getEpisodes():
-    query = urlparse.urljoin(m4_url, '/wp-content/plugins/telesport.hu.widgets/widgets/newSubCategory/ajax_loadmore.php?cat_id={0}&post_type=video&blog_id=4&page_number={1}'.format(category, page))
+    query = urlparse.urljoin(m4_url,
+                             '/wp-content/plugins/telesport.hu.widgets/widgets/newSubCategory/ajax_loadmore.php?cat_id={0}&post_type=video&blog_id=4&page_number={1}'.format(
+                                 category, page))
     r = client.request(query)
     result = json.loads(r)
     for i in result:
-        #if i['has_video'] != True: continue
+        # if i['has_video'] != True: continue
         title = client.replaceHTMLCodes(i['title'])
         title = py2_encode(title)
         link = py2_encode(i['link'])
@@ -60,72 +75,109 @@ def getEpisodes():
         if img.startswith('//'): img = 'http:' + img
         addDir({'title': title, 'url': link, 'action': 'getVideo', 'image': img, 'isFolder': 'false'})
     if len(result) >= 10:
-        addDir({'title': '[COLOR green]Következő oldal[/COLOR]', 'action': 'getEpisodes', 'page': str(int(page) + 1), 'category': category, 'isFolder': 'true'})
+        addDir({'title': '[COLOR green]Következő oldal[/COLOR]', 'action': 'getEpisodes', 'page': str(int(page) + 1),
+                'category': category, 'isFolder': 'true'})
     xbmcplugin.endOfDirectory(syshandle)
 
-def is_dirty(candidate):
+
+def isDirty(candidate):
+    if candidate is None:
+        return True
+
     blocklist = ['bumper', 'promo', 'advertisement', 'reklam']
     return any(word in candidate for word in blocklist)
 
-def get_depth(candidate):
-    parsed = urlparse.urlparse(candidate)
-    path_segments = [segment for segment in parsed.path.split('/') if segment]
 
-    return len(path_segments)
+def getValidStreams(playlist_data):
+    ls = []
+    valid_list = []
+    if isinstance(playlist_data, dict):  # if it is only one object and not an array then add it to the list
+        ls.append(playlist_data)
+    elif isinstance(playlist_data, list):
+        ls = playlist_data
+
+    for obj in ls:
+        if not isDirty(obj.get('file', None)):  # an URL is dirty if it contains promo keywords or if it is of type None
+            valid_list.append(obj)
+
+    return valid_list
 
 
 def getLive():
     content_id = streamid
-    embeddedUrl = 'https://player.mediaklikk.hu/playernew/player.php?video={0}&noflash=yes&osfamily=Android&osversion=7.0&browsername=Chrome%20Mobile&browserversion=&title=&contentid={0}&embedded=1'.format(
+    embedded_url = 'https://player.mediaklikk.hu/playernew/player.php?video={0}&noflash=yes&osfamily=Android&osversion=7.0&browsername=Chrome%20Mobile&browserversion=&title=&contentid={0}&embedded=1'.format(
         content_id)
-    r = client.request(embeddedUrl)
+    r = client.request(embedded_url)
 
-    playlist = re.search('''['"]playlist['"]\s*:\s*(\[[^\]]+\])''', r)
-    if playlist is None:
+    regex_match = re.search(r'var\s+playData\s*=\s*(\[[\s\S]*?\])\s*;', r)
+
+    if regex_match is None:
+        regex_match = re.search(r'(\[[^\]]*?"connectmedia"[^\]]*?\])',
+                                r)  # fallback regex to search for the connectmedia string if the edge server generated JS code changes
+
+    if regex_match is None:  # only throw fatal error if both failed
         ok = xbmcgui.Dialog().ok('Stream hiba',
                                  'A stream URL nem található. A válasz struktúra változhatott...')
         return  # fatal error
 
-    playlist = json.loads(playlist.group(1))
-    url_list = []
-    for link_obj in playlist:
-        url_str = link_obj.get('file', '')
-        if '.m3u' in url_str:
-            url_list.append(url_str) # sanitization; only introduce URLs that contain a stream link in the first place
+    valid_streams = []
+    for group in regex_match.groups():  # check every matched json
+        try:
+            json_data = json.loads(group)
+        except json.JSONDecodeError as e:
+            print(f'Captured content: \n{group}\n not a valid JSON structure')
+        # if loaded successfully then try to filter
+        valid_streams.extend(getValidStreams(json_data))
 
-    if len(url_list) == 0:
-        raise ValueError("Nem találtunk stream URL-t!")
-
-    link = None  # start with an invalid link
-
-    # Primary structural check
-    for link_candidate in url_list:
-        if get_depth(link_candidate) > 4: continue  # skip if invalid url (typically banner streams like the one during
-        # Olympic Games, have more slash separated segments. Valid URLS typically have 4 unless something changes
-        link = link_candidate
-        break  # always pick the first valid URL as they tend to be the first ones in the list (in play order)
-
-    # if the aggressive filter yielded zero results, fall back to the word blocklist method
-    if link is None:
-        for link_candidate in url_list:
-            if is_dirty(link_candidate): continue
-            link = link_candidate
-            break  # pick first valid
-
-    # If none of these filters yielded any result then fall back to the first url and notify user
-    if link is None:
-        link = url_list[0]
-        xbmcgui.Dialog().notification(
+    # if there is nothing to play, should never happen...
+    if len(valid_streams) == 0:
+        xbmcgui.Dialog().ok(
             'Stream figyelmeztetés',
-            'Az URL filterek nem adtak eredményt, a legelső URL fog lejátszódni...',
-            xbmcgui.NOTIFICATION_WARNING
+            'Nem találtunk érvényes közvetítést...'
         )
+        return
 
-    if link.startswith('//'): link = 'http:' + link
-    link = py2_encode(link)
-    stream = get_Stream(link)
-    if stream:
-        resolve(stream, image, title)
+    # build playlist for kodi to resolve with multiple streams
+    kodi_playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    kodi_playlist.clear()
+
+    for index, item in enumerate(valid_streams):
+        stream_url = item.get("file")
+        stream_type = item.get("type", "").lower()
+
+        if not stream_url:
+            continue
+
+        stream_url = stream_url.replace('\\', '')
+        if not stream_url.startswith("http"):
+            stream_url = "https:" + stream_url if stream_url.startswith("//") else stream_url
+
+        item_title = f"Stream {index + 1}"
+
+        list_item = xbmcgui.ListItem(label=item_title)
+        list_item.setProperty('IsPlayable', 'true')
+
+        if stream_type == "dash":
+            list_item.setProperty('inputstream', 'inputstream.adaptive')
+            list_item.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+
+            drm = item.get("drm", {}).get("widevine", {})
+            if drm:
+                license_key = drm.get("url")
+                if license_key:
+                    list_item.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
+                    list_item.setProperty('inputstream.adaptive.license_key', f"{license_key}||R{{SSM}}|")
+
+        elif stream_type == "hls" or stream_url.endswith(".m3u8"):
+            list_item.setProperty('inputstream', 'inputstream.adaptive')
+            list_item.setProperty('inputstream.adaptive.manifest_type', 'hls')
+
+        kodi_playlist.add(url=stream_url, listitem=list_item)
+
+    if kodi_playlist.size() > 0:
+        xbmcplugin.setResolvedUrl(syshandle, False, xbmcgui.ListItem())
+        xbmc.Player().play(kodi_playlist)
+
 
 def getVideo():
     r = client.request(url)
@@ -135,14 +187,14 @@ def getVideo():
     link = link.replace('\\', '')
     if (not link.startswith("http:") or not link.startswith("https:")):
         link = "%s%s" % ("https:", link)
-    stream = get_Stream(link)
+    stream = getStream(link)
     if stream:
         resolve(stream, image, title)
     else:
         return
 
 
-def get_Stream(url):
+def getStream(url):
     if xbmcaddon.Addon().getSetting('quality') == 'true':
         return url
     result = client.request(url)
@@ -151,31 +203,32 @@ def get_Stream(url):
 
     if not playlist:
         return url
-    
-    try: playlist = sorted(playlist, key=lambda tup: tup['stream_info']['bandwidth'], reverse=True)
-    except: pass
+
+    try:
+        playlist = sorted(playlist, key=lambda tup: tup['stream_info']['bandwidth'], reverse=True)
+    except:
+        pass
 
     qkey = 'resolution' if 'resolution' in playlist[0]['stream_info'] else 'bandwidth'
     qualities = []
     urls = []
 
     for item in playlist:
-
         quality = str(item['stream_info'][qkey])
         uri = item['uri']
         uri = urlparse.urljoin(url, uri)
         qualities.append(quality)
         urls.append(uri)
-    
+
     dialog = xbmcgui.Dialog()
     q = dialog.select('Minőség', qualities)
     if q <= len(qualities) and not q == -1:
-        return(urls[q])
+        return (urls[q])
     else:
         return None
 
 
-def resolve(url, icon, title):   
+def resolve(url, icon, title):
     item = xbmcgui.ListItem(path=url)
     item.setArt({'icon': icon, 'thumb': icon})
     item.setInfo(type='Video', infoLabels={'Title': title})
@@ -183,7 +236,8 @@ def resolve(url, icon, title):
 
 
 def addDir(item):
-    sysimage = xbmcaddon.Addon().getAddonInfo('icon'); sysfanart = xbmcaddon.Addon().getAddonInfo('fanart')
+    sysimage = xbmcaddon.Addon().getAddonInfo('icon');
+    sysfanart = xbmcaddon.Addon().getAddonInfo('fanart')
 
     label = item['title']
     if 'image' in item:
@@ -197,47 +251,53 @@ def addDir(item):
         url += '&title=%s' % quote_plus(item['title'])
     except KeyError:
         url += '&title=%s' % quote_plus(py2_encode(item['title']))
-    try: url += '&url=%s' % quote_plus(item['url'])
-    except: pass
-    try: url += '&image=%s' % quote_plus(item['image'])
-    except:pass
-    try: url += '&category=%s' % quote_plus(item['category'])
-    except: pass
-    try: url += '&page=%s' % quote_plus(item['page'])
-    except: pass
-    try: url += '&streamid=%s' % quote_plus(item['streamid'])
-    except: pass
+    try:
+        url += '&url=%s' % quote_plus(item['url'])
+    except:
+        pass
+    try:
+        url += '&image=%s' % quote_plus(item['image'])
+    except:
+        pass
+    try:
+        url += '&category=%s' % quote_plus(item['category'])
+    except:
+        pass
+    try:
+        url += '&page=%s' % quote_plus(item['page'])
+    except:
+        pass
+    try:
+        url += '&streamid=%s' % quote_plus(item['streamid'])
+    except:
+        pass
 
-    liz=xbmcgui.ListItem(label=label)
+    liz = xbmcgui.ListItem(label=label)
     liz.setArt({'icon': image, 'thumb': image, 'poster': image, 'fanart': fanart})
     liz.setInfo(type="Video", infoLabels={"Title": label})
+
     if isFolder is False:
-        liz.setProperty('IsPlayable', 'true')
+        if item.get('action') != 'getLive':
+            liz.setProperty('IsPlayable', 'true')
+
     xbmcplugin.addDirectoryItem(handle=syshandle, url=url, listitem=liz, isFolder=isFolder)
 
 
-params = dict(parse_qsl(sys.argv[2].replace('?','')))
+params = dict(parse_qsl(sys.argv[2].replace('?', '')))
 
 url = params.get("url")
-
 title = params.get("title")
-
 image = params.get("image")
-
 action = params.get("action")
-
 page = params.get("page")
-
 category = params.get("category")
-
 streamid = params.get("streamid", '')
 
-if action==None:
+if action == None:
     root()
-elif action=='getEpisodes':
+elif action == 'getEpisodes':
     getEpisodes()
-elif action=='getVideo':
+elif action == 'getVideo':
     getVideo()
-elif action=='getLive':
+elif action == 'getLive':
     getLive()
-
