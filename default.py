@@ -83,7 +83,7 @@ def getEpisodes():
     xbmcplugin.endOfDirectory(syshandle)
 
 
-def isDirty(candidate: str):
+def isDirty(candidate):
     if candidate is None:
         return True
 
@@ -101,10 +101,10 @@ def getValidStreams(playlist_data):
 
     for obj in ls:
         if not isDirty(obj.get('file', None)):  # an URL is dirty if it contains promo keywords or if it is of type None
-            print(f'Found valid URL: {obj.get('file')}')
+            print(f"Found valid URL: {obj.get('file')}")
             valid_list.append(obj)
         else:
-            print(f'Filtered the following URL: {obj.get('file')}')
+            print(f"Filtered the following URL: {obj.get('file')}")
 
     return valid_list
 
